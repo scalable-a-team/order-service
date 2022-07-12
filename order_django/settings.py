@@ -33,24 +33,13 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
     'rest_framework',
     'order_django.order',
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'order_django.urls'
@@ -65,7 +54,6 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
         },
@@ -74,6 +62,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'order_django.wsgi.application'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
+    'DEFAULT_PERMISSION_CLASSES': [],
+    'UNAUTHENTICATED_USER': None
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -114,6 +107,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-KONG_ANON_HEADER = 'X-Anonymous-Consumer'
-KONG_USER_GROUP = 'X-Kong-Jwt-Claim-Group'
-KONG_USER_ID = 'X-Kong-Jwt-Claim-User-Id'
+KONG_ANON_HEADER = 'HTTP_X_ANONYMOUS_CONSUMER'
+KONG_USER_GROUP = 'HTTP_X_KONG_JWT_CLAIM_GROUP'
+KONG_USER_ID = 'HTTP_X_KONG_JWT_CLAIM_USERID'

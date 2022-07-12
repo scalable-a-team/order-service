@@ -3,7 +3,7 @@ from rest_framework import serializers
 from order_django.order.views import Order
 
 
-class OrderResponseSerializer(serializers.ModelSerializer):
+class OrderReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['uuid', 'status', 'seller_id', 'buyer_id', 'product_id',
