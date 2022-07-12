@@ -16,5 +16,5 @@ Including another URLconf
 from django.urls import path, include
 
 urlpatterns = [
-    path('order/', include('order_django.order.urls')),
+    path('/api/order/', include('order_django.order.urls')),
 ]
