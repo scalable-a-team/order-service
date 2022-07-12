@@ -24,4 +24,4 @@ WORKDIR /code
 COPY . .
 
 
-CMD ["gunicorn", "order_django.wsgi:application"]
+CMD ["gunicorn", "--bind", ":8000", "order_django.wsgi"]
