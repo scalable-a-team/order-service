@@ -1,3 +1,5 @@
+import uuid
+
 from rest_framework import mixins, status
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -22,12 +24,17 @@ class OrderBuyerViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixi
     def create(self, request, *args, **kwargs):
         user_id = self.request.META[KONG_USER_ID]
         product_id = request.data['product_id']
+        order_id = uuid.uuid4()
         celery_app.send_task(
             EventStatus.CREATE_ORDER,
-            kwargs={'product_id': product_id, 'buyer_id': user_id},
+            kwargs={
+                'product_id': product_id,
+                'buyer_id': user_id,
+                'order_id': order_id
+            },
             queue=QueueName.ORDER,
         )
-        return Response(status=status.HTTP_201_CREATED)
+        return Response({'order_id': order_id}, status=status.HTTP_201_CREATED)
 
 
 class OrderSellerViewSet(mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
