@@ -17,7 +17,6 @@ from order_django import order
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
@@ -28,7 +27,6 @@ SECRET_KEY = 'django-insecure-%6jgqp42c(w348^$s5#r9-iiruj0^w*3k#^(m9f-tld)a5_0-v
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -82,12 +80,10 @@ DATABASES = {
     }
 }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = []
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
@@ -99,7 +95,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
@@ -114,3 +109,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 KONG_ANON_HEADER = 'HTTP_X_ANONYMOUS_CONSUMER'
 KONG_USER_GROUP = 'HTTP_X_KONG_JWT_CLAIM_GROUP'
 KONG_USER_ID = 'HTTP_X_KONG_JWT_CLAIM_USERID'
+
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
