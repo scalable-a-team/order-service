@@ -23,5 +23,5 @@ ENV PATH="/.venv/bin:$PATH"
 WORKDIR /code
 COPY . .
 
-
-CMD ["gunicorn", "--bind", ":8000", "order_django.wsgi"]
+RUN chmod +x startup.sh
+CMD ["./startup.sh"]
