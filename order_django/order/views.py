@@ -10,7 +10,9 @@ from order_django.order.models import Order
 from order_django.order.serializers import OrderReadSerializer
 from order_django.permissions import IsBuyer, IsSeller
 from order_django.settings import KONG_USER_ID
-from opentelemetry import propagators
+from opentelemetry import propagate
+
+PROPAGATOR = propagate.get_global_textmap()
 
 
 class OrderBuyerViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
@@ -27,7 +29,8 @@ class OrderBuyerViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixi
         product_id = request.data['product_id']
         order_id = uuid.uuid4()
         context_payload = {}
-        propagators.inject(type(context_payload).__setitem__, context_payload)
+
+        PROPAGATOR.inject(carrier=context_payload, setter=type(context_payload).__setitem__)
         celery_app.send_task(
             EventStatus.CREATE_ORDER,
             kwargs={
