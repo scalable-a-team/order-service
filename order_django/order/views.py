@@ -30,7 +30,7 @@ class OrderBuyerViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixi
         order_id = uuid.uuid4()
         context_payload = {}
 
-        PROPAGATOR.inject(carrier=context_payload, setter=type(context_payload).__setitem__)
+        PROPAGATOR.inject(carrier=context_payload)
         celery_app.send_task(
             EventStatus.CREATE_ORDER,
             kwargs={
