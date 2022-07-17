@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from order_django.celery import app as celery_app
-from order_django.order.enums import EventStatus, QueueName
+from order_django.order.enums import EventStatus, QueueName, OrderStatus
 from order_django.order.models import Order
 from order_django.order.serializers import OrderReadSerializer
 from order_django.permissions import IsBuyer, IsSeller
@@ -14,6 +14,7 @@ from opentelemetry import propagate, trace
 
 PROPAGATOR = propagate.get_global_textmap()
 tracer = trace.get_tracer(__name__)
+
 
 class OrderBuyerViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
     queryset = Order.objects.all()
@@ -53,3 +54,32 @@ class OrderSellerViewSet(mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mix
     def get_queryset(self):
         user_id = self.request.META[KONG_USER_ID]
         return Order.objects.filter(seller_id=user_id).order_by('-created_at')
+
+    def update(self, request, *args, **kwargs):
+        seller_id = self.request.META[KONG_USER_ID]
+        order_id = request.data['order_id']
+        new_order_status = request.data['new_status']
+        order_instance = Order.objects.get(order_id=order_id, seller_id=seller_id)
+
+        if not OrderStatus.is_new_status_valid(order_instance.status, new_order_status):
+            return Response({'error': 'Invalid status to transition to'}, status.HTTP_400_BAD_REQUEST)
+
+        if new_order_status == OrderStatus.FAILED:
+            context_payload = {}
+            PROPAGATOR.inject(carrier=context_payload)
+            with tracer.start_span(f"send_task {EventStatus.REJECT_ORDER}"):
+                celery_app.send_task(
+                    EventStatus.REJECT_ORDER,
+                    kwargs={
+                        'product_id': order_instance.product_id,
+                        'buyer_id': order_instance.buyer_id,
+                        'order_id': order_id,
+                        'price': order_instance.total_incl_tax,
+                        'context_payload': context_payload
+                    },
+                    queue=QueueName.ORDER,
+                )
+        order_instance.status = new_order_status
+        order_instance.save()
+        serializer = self.get_serializer(order_instance)
+        return Response(serializer.data)
