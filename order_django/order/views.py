@@ -56,10 +56,8 @@ class OrderSellerViewSet(mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mix
         return Order.objects.filter(seller_id=user_id).order_by('-created_at')
 
     def update(self, request, *args, **kwargs):
-        seller_id = self.request.META[KONG_USER_ID]
-        order_id = request.data['order_id']
+        order_instance = self.get_object()
         new_order_status = request.data['new_status']
-        order_instance = Order.objects.get(order_id=order_id, seller_id=seller_id)
 
         if not OrderStatus.is_new_status_valid(order_instance.status, new_order_status):
             return Response({'error': 'Invalid status to transition to'}, status.HTTP_400_BAD_REQUEST)
@@ -73,7 +71,7 @@ class OrderSellerViewSet(mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mix
                     kwargs={
                         'product_id': order_instance.product_id,
                         'buyer_id': order_instance.buyer_id,
-                        'order_id': order_id,
+                        'order_id': order_instance.uuid,
                         'price': order_instance.total_incl_tax,
                         'context_payload': context_payload
                     },
