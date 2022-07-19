@@ -33,16 +33,20 @@ class OrderBuyerViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixi
         PROPAGATOR.inject(carrier=context_payload)
 
         with tracer.start_span(f"send_task {EventStatus.CREATE_ORDER}"):
-            celery_app.send_task(
-                EventStatus.CREATE_ORDER,
-                kwargs={
-                    'product_id': product_id,
-                    'buyer_id': user_id,
-                    'order_id': order_id,
-                    'context_payload': context_payload
-                },
-                queue=QueueName.ORDER,
-            )
+            try:
+                celery_app.send_task(
+                    EventStatus.CREATE_ORDER,
+                    kwargs={
+                        'product_id': product_id,
+                        'buyer_id': user_id,
+                        'order_id': order_id,
+                        'context_payload': context_payload
+                    },
+                    queue=QueueName.ORDER,
+                )
+            except Exception as e:
+                print(e)
+                return Response({'error': 'Celery connection failed'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'order_id': order_id}, status=status.HTTP_201_CREATED)
 
 
