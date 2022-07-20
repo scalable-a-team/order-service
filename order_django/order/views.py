@@ -66,22 +66,26 @@ class OrderSellerViewSet(mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mix
         if not OrderStatus.is_new_status_valid(order_instance.status, new_order_status):
             return Response({'error': 'Invalid status to transition to'}, status.HTTP_400_BAD_REQUEST)
 
-        if new_order_status == OrderStatus.FAILED:
-            context_payload = {}
-            PROPAGATOR.inject(carrier=context_payload)
-            with tracer.start_span(f"send_task {EventStatus.REJECT_ORDER}"):
+        context_payload = {}
+        PROPAGATOR.inject(carrier=context_payload)
+
+        event = OrderStatus.get_event_from_new_status(new_order_status)
+
+        with tracer.start_span(f"send_task {event}"):
+            try:
                 celery_app.send_task(
-                    EventStatus.REJECT_ORDER,
+                    event,
                     kwargs={
-                        'product_id': order_instance.product_id,
                         'buyer_id': order_instance.buyer_id,
-                        'order_id': order_instance.uuid,
-                        'price': order_instance.total_incl_tax,
+                        'seller_id': order_instance.seller_id,
+                        'product_amount': order_instance.total_incl_tax,
+                        'order_id': order_instance.id,
                         'context_payload': context_payload
                     },
                     queue=QueueName.ORDER,
                 )
-        order_instance.status = new_order_status
-        order_instance.save()
-        serializer = self.get_serializer(order_instance)
-        return Response(serializer.data)
+            except Exception as e:
+                print(e)
+                return Response({'error': 'Celery connection failed'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(status=200)
