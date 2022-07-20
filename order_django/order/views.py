@@ -66,8 +66,8 @@ class OrderSellerViewSet(mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mix
         if not OrderStatus.is_new_status_valid(order_instance.status, new_order_status):
             return Response({'error': 'Invalid status to transition to'}, status.HTTP_400_BAD_REQUEST)
 
-        context_payload = {}
-        PROPAGATOR.inject(carrier=context_payload)
+        # context_payload = {}
+        # PROPAGATOR.inject(carrier=context_payload)
 
         event = OrderStatus.get_event_from_new_status(new_order_status)
 
@@ -80,7 +80,7 @@ class OrderSellerViewSet(mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mix
                         'seller_id': order_instance.seller_id,
                         'product_amount': order_instance.total_incl_tax,
                         'order_id': order_instance.uuid,
-                        'context_payload': context_payload
+                        # 'context_payload': context_payload
                     },
                     queue=QueueName.ORDER,
                 )
