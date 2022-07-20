@@ -2,6 +2,7 @@ import os
 
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.celery import CeleryInstrumentor
 from opentelemetry.instrumentation.django import DjangoInstrumentor
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
@@ -25,3 +26,4 @@ def post_fork(server, worker):
         DjangoInstrumentor().instrument()
         LoggingInstrumentor().instrument(set_logging_format=True)
         RequestsInstrumentor().instrument()
+        CeleryInstrumentor().instrument()
