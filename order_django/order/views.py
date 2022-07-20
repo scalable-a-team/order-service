@@ -79,7 +79,7 @@ class OrderSellerViewSet(mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mix
                         'buyer_id': order_instance.buyer_id,
                         'seller_id': order_instance.seller_id,
                         'product_amount': order_instance.total_incl_tax,
-                        'order_id': order_instance.id,
+                        'order_id': order_instance.uuid,
                         'context_payload': context_payload
                     },
                     queue=QueueName.ORDER,
