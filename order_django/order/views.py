@@ -25,7 +25,12 @@ class OrderBuyerViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixi
 
     def get_queryset(self):
         user_id = self.request.META[KONG_USER_ID]
-        return Order.objects.filter(buyer_id=user_id).order_by('-created_at')
+        qs = Order.objects.filter(buyer_id=user_id).order_by('-created_at')
+        order_status = self.request.query_params.get('status')
+        if order_status is not None:
+            qs = qs.filter(status=status)
+        return qs
+
 
     def create(self, request, *args, **kwargs):
         user_id = self.request.META[KONG_USER_ID]
@@ -74,7 +79,11 @@ class OrderSellerViewSet(mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mix
 
     def get_queryset(self):
         user_id = self.request.META[KONG_USER_ID]
-        return Order.objects.filter(seller_id=user_id).order_by('-created_at')
+        order_status = self.request.query_params.get('status')
+        qs = Order.objects.filter(seller_id=user_id).order_by('-created_at')
+        if order_status is not None:
+            qs = qs.filter(status=order_status)
+        return qs
 
     def update(self, request, *args, **kwargs):
         order_instance = self.get_object()
