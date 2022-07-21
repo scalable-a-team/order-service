@@ -7,4 +7,4 @@ class OrderReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['uuid', 'status', 'seller_id', 'buyer_id', 'product_id',
-                  'total_incl_tax', 'date_shipped', 'created_at']
+                  'total_incl_tax', 'date_shipped', 'created_at', 'dimension_text', 'description_text']

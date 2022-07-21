@@ -30,6 +30,8 @@ class OrderBuyerViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixi
     def create(self, request, *args, **kwargs):
         user_id = self.request.META[KONG_USER_ID]
         product_id = request.data['product_id']
+        job_description = request.data['job_description']
+        dimension = request.data['dimension']
 
         response = requests.get(f'{settings.PRODUCT_SERVICE_URL}/{product_id}')
         if not response.ok:
@@ -53,6 +55,8 @@ class OrderBuyerViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixi
                         'order_id': order_id,
                         'seller_id': seller_id,
                         'product_amount': price,
+                        'job_description': job_description,
+                        'dimension': dimension,
                         'context_payload': context_payload
                     },
                     queue=QueueName.ORDER,
