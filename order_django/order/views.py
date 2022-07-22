@@ -28,7 +28,7 @@ class OrderBuyerViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixi
         qs = Order.objects.filter(buyer_id=user_id).order_by('-created_at')
         order_status = self.request.query_params.get('status')
         if order_status is not None:
-            qs = qs.filter(status=status)
+            qs = qs.filter(status=order_status)
         return qs
 
 
